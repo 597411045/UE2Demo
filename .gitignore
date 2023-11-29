@@ -1,0 +1,10 @@
+*.zip
+
+/*
+!/.gitignore
+!/.gitattributes
+
+!/Content
+/Content/Movies
+/Content/Work/ExternalResource
+
