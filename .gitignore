@@ -3,7 +3,7 @@
 /*
 !/.gitignore
 !/.gitattributes
-
+!/Source
 !/Content
 /Content/Movies
 /Content/Work/ExternalResource
