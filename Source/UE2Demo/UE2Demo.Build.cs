@@ -11,7 +11,10 @@ public class UE2Demo : ModuleRules
 		bEnableUndefinedIdentifierWarnings = false;
 
 		PublicDependencyModuleNames.AddRange(new string[]
-			{ "Core", "CoreUObject", "Engine", "InputCore", "Networking", "Sockets", "UMG" });
+		{
+			"Core", "CoreUObject", "Engine", "InputCore", "Networking", "Sockets", "UMG", "OnlineSubsystemSteam",
+			"OnlineSubsystem"
+		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 
@@ -25,7 +28,7 @@ public class UE2Demo : ModuleRules
 
 		PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "include"));
 		PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyPath, "lib", "libcurl_a.lib"));
-		
+
 		PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyPath, "lib", "ws2_32.lib"));
 		PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyPath, "lib", "wldap32.lib"));
 		PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyPath, "lib", "crypt32.lib"));
@@ -36,5 +39,4 @@ public class UE2Demo : ModuleRules
 	{
 		get { return Path.GetFullPath(Path.Combine(ModuleDirectory, "../../ThirdParty")); }
 	}
-	
 }
