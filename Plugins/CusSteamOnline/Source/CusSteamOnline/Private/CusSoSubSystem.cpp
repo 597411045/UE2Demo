@@ -96,15 +96,16 @@ void UCusSoSubsystem::CreateGameSession()
 	if (ioSessionP->CreateSession(*player->GetPreferredUniqueNetId(), NAME_GameSession, *setting) == true)
 	{
 		///
-		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Yellow,
+		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green,
 		                                 FString::Printf(TEXT("Try Create Session %d Success"), NAME_GameSession));
 	}
 	else
 	{
 		///
-		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Yellow,
+		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red,
 		                                 FString::Printf(TEXT("Try Create Session %d Failed"), NAME_GameSession));
 		//ioSessionP->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionHandle);
+		DELE_CusSoAfterCreateSession.Broadcast(false);
 		ioSessionP->OnCreateSessionCompleteDelegates.Remove(CreateSessionHandle);
 	}
 }
@@ -126,7 +127,7 @@ void UCusSoSubsystem::DoAfterCreateSession(FName name, bool flag)
 		                                 FString::Printf(TEXT("Create Session %s Failed"), *name.ToString()));
 	}
 	DELE_CusSoAfterCreateSession.Broadcast(flag);
-	ioSessionP->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionHandle);
+	ioSessionP->OnCreateSessionCompleteDelegates.Remove(CreateSessionHandle);
 }
 
 void UCusSoSubsystem::StartGameSession()
@@ -150,23 +151,37 @@ void UCusSoSubsystem::FindGameSession()
 	//
 	search = MakeShareable(new FOnlineSessionSearch());
 	search->MaxSearchResults = 10000;
-	search->bIsLanQuery = false;
-	search->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+	search->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL" ? true : false;
+	if (search->bIsLanQuery == false)
+	{
+		search->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+	}
 	//
 	const ULocalPlayer* player = GetWorld()->GetFirstLocalPlayerFromController();
 	//
-	ioSessionP->OnFindSessionsCompleteDelegates.AddUObject(this, &UCusSoSubsystem::DoAfterFindSession);
-	ioSessionP->FindSessions(*player->GetPreferredUniqueNetId(), search.ToSharedRef());
-	///
-	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Yellow,
-	                                 FString::Printf(TEXT("Finding A Session %d"), NAME_GameSession));
+	FindSessionHandle = ioSessionP->OnFindSessionsCompleteDelegates.AddUObject(
+		this, &UCusSoSubsystem::DoAfterFindSession);
+	if (ioSessionP->FindSessions(*player->GetPreferredUniqueNetId(), search.ToSharedRef()) == true)
+	{
+		///
+		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green,
+		                                 FString::Printf(TEXT("Try Find Session %d Success"), NAME_GameSession));
+	}
+	else
+	{
+		///
+		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red,
+		                                 FString::Printf(TEXT("Try Find Session %d Failed"), NAME_GameSession));
+		DELE_CusSoAfterFindSession.Broadcast(TArray<FOnlineSessionSearchResult>(), false);
+		ioSessionP->OnFindSessionsCompleteDelegates.Remove(FindSessionHandle);
+	}
 }
 
 void UCusSoSubsystem::DoAfterFindSession(bool flag)
 {
 	///
 	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Yellow,
-	                                 FString::Printf(TEXT("Finding Session Done %d"), NAME_GameSession));
+	                                 FString::Printf(TEXT("Find Session Done %d"), NAME_GameSession));
 	//
 	//for (FOnlineSessionSearchResult result : search->SearchResults)
 	for (int i = 0; i < search->SearchResults.Num(); i++)
@@ -187,9 +202,11 @@ void UCusSoSubsystem::DoAfterFindSession(bool flag)
 			                                 FString::Printf(TEXT("This Is A Valid Session")));
 			break;
 		}
-	}
+		// }
 
-	DELE_CusSoAfterFindSession.Broadcast(search->SearchResults, flag);
+		DELE_CusSoAfterFindSession.Broadcast(search->SearchResults, flag);
+		ioSessionP->OnFindSessionsCompleteDelegates.Remove(FindSessionHandle);
+	}
 }
 
 void UCusSoSubsystem::JoinGameSession()
@@ -202,10 +219,8 @@ void UCusSoSubsystem::JoinGameSession()
 		return;
 	}
 
-
 	if (ValidSession == nullptr)
 	{
-		///
 		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red,
 		                                 FString::Printf(TEXT("ValidSession Is Nulllptr")));
 		return;
@@ -213,9 +228,24 @@ void UCusSoSubsystem::JoinGameSession()
 	//
 	const ULocalPlayer* player = GetWorld()->GetFirstLocalPlayerFromController();
 	//
-	ioSessionP->OnJoinSessionCompleteDelegates.AddUObject(this, &UCusSoSubsystem::DoAfterJoinSession);
-	ioSessionP->JoinSession(*player->GetPreferredUniqueNetId(), NAME_GameSession, *ValidSession);
+	JoinSessionHandle = ioSessionP->OnJoinSessionCompleteDelegates.AddUObject(
+		this, &UCusSoSubsystem::DoAfterJoinSession);
+	if (ioSessionP->JoinSession(*player->GetPreferredUniqueNetId(), NAME_GameSession, *ValidSession) == true)
+	{
+		///
+		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green,
+		                                 FString::Printf(TEXT("Try Join Session %d Success"), NAME_GameSession));
+	}
+	else
+	{
+		///
+		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green,
+		                                 FString::Printf(TEXT("Try Join Session %d Failed"), NAME_GameSession));
+		DELE_CusSoAfterJoinSession.Broadcast(EOnJoinSessionCompleteResult::UnknownError);
+		ioSessionP->OnJoinSessionCompleteDelegates.Remove(JoinSessionHandle);
+	}
 }
+
 
 void UCusSoSubsystem::DoAfterJoinSession(FName name, EOnJoinSessionCompleteResult::Type flag)
 {
@@ -233,6 +263,7 @@ void UCusSoSubsystem::DoAfterJoinSession(FName name, EOnJoinSessionCompleteResul
 		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red,
 		                                 FString::Printf(TEXT("GetResolvedConnectString Failed")));
 	}
+	ioSessionP->OnJoinSessionCompleteDelegates.Remove(JoinSessionHandle);
 	DELE_CusSoAfterJoinSession.Broadcast(flag);
 }
 

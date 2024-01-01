@@ -48,13 +48,15 @@ public:
 	FCusSoAfterJoinSession DELE_CusSoAfterJoinSession;
 	FCusSoAfterDestroySession DELE_CusSoAfterDestroySession;
 
+
 private:
 	//IOnlineSessionPtr
 	TSharedPtr<class IOnlineSession, ESPMode::ThreadSafe> ioSessionP;
-
 	TSharedPtr<class FOnlineSessionSettings> setting;
 	TSharedPtr<class FOnlineSessionSearch> search;
+
 	class FOnlineSessionSearchResult* ValidSession;
+
 	class FDelegateHandle CreateSessionHandle;
 	class FDelegateHandle StartSessionHandle;
 	class FDelegateHandle FindSessionHandle;

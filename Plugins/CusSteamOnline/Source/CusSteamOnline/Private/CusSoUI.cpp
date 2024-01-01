@@ -3,6 +3,7 @@
 
 #include "CusSoUI.h"
 #include "CusSoSubsystem.h"
+#include "OnlineSessionSettings.h"
 #include "Components/Button.h"
 
 
