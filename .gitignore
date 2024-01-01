@@ -8,3 +8,9 @@
 /Content/Movies
 /Content/Work/ExternalResource
 /Content/Japan_Village
+!/Plugins/
+Plugins/*
+!/Plugins/CusSteamOnline
+Plugins/CusSteamOnline/*
+!/Plugins/CusSteamOnline/Content
+!/Plugins/CusSteamOnline/Source
