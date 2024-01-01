@@ -160,19 +160,20 @@ void UCusSessionComponent::DoAfterFindSession(bool flag)
 	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Yellow,
 	                                 FString::Printf(TEXT("Finding Session Done %d"), NAME_GameSession));
 	//
-	for (FOnlineSessionSearchResult result : search->SearchResults)
+	//for (FOnlineSessionSearchResult result : search->SearchResults)
+	for (int i = 0; i < search->SearchResults.Num(); i++)
 	{
-		FString id = result.GetSessionIdStr();
-		FString user = result.Session.OwningUserName;
+		FString id = search->SearchResults[i].GetSessionIdStr();
+		FString user = search->SearchResults[i].Session.OwningUserName;
 		///
 		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Yellow,
 		                                 FString::Printf(TEXT("Get A ID: %s, User: %s"), *id, *user));
 		//
 		FString testKey;
-		result.Session.SessionSettings.Get(FName("TestKey"), testKey);
+		search->SearchResults[i].Session.SessionSettings.Get(FName("TestKey"), testKey);
 		if (testKey == FString("TestValue"))
 		{
-			ValidSession = &result;
+			ValidSession = &search->SearchResults[i];
 			///
 			GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green,
 			                                 FString::Printf(TEXT("This Is A Valid Session")));
@@ -192,7 +193,7 @@ void UCusSessionComponent::JoinGameSession()
 	}
 
 
-	if (ValidSession->IsValid() == false)
+	if (ValidSession == nullptr)
 	{
 		///
 		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red,
@@ -212,7 +213,7 @@ void UCusSessionComponent::DoAfterJoinSession(FName name, EOnJoinSessionComplete
 	if (ioSessionP->GetResolvedConnectString(NAME_GameSession, Address))
 	{
 		///
-		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red,
+		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green,
 		                                 FString::Printf(TEXT("GetResolvedConnectString Success: %s"), *Address));
 		//
 		CallClientTravel(Address);
