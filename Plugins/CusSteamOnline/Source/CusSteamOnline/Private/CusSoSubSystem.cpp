@@ -32,16 +32,17 @@ void UCusSoSubsystem::BeginPlay()
 		//                                  FString::Printf(
 		// 	                                 TEXT("Get A Session Interface %s"),
 		// 	                                 *ioSub->GetSubsystemName().ToString()));
+
 	}
 }
 
 
-void UCusSoSubsystem::OpenLobby()
+void UCusSoSubsystem::OpenLobby(const FString& lobbyName = FString::Printf(TEXT("/Game/Work/Test/Lobby?listen")))
 {
 	UWorld* world = GetWorld();
 	if (world)
 	{
-		world->ServerTravel("/Game/Work/Test/Lobby?listen");
+		world->ServerTravel(lobbyName);
 	}
 }
 
@@ -86,6 +87,8 @@ void UCusSoSubsystem::CreateGameSession()
 	setting->bUsesPresence = true;
 	setting->bUseLobbiesIfAvailable = true;
 	setting->Set(FName("TestKey"), FString("TestValue"), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	setting->BuildUniqueId = 1;
+
 	//
 	const ULocalPlayer* player = GetWorld()->GetFirstLocalPlayerFromController();
 	//

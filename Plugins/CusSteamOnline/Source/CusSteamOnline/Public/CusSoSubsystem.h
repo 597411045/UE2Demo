@@ -48,6 +48,8 @@ public:
 	FCusSoAfterJoinSession DELE_CusSoAfterJoinSession;
 	FCusSoAfterDestroySession DELE_CusSoAfterDestroySession;
 
+	UFUNCTION(BlueprintCallable)
+	void OpenLobby(const FString& lobbyName);
 
 private:
 	//IOnlineSessionPtr
@@ -74,9 +76,6 @@ private:
 	//FOnDestroySessionCompleteDelegate
 	//TDelegate<void(FName, bool)> afterDestroySession;
 
-
-	UFUNCTION(BlueprintCallable)
-	void OpenLobby();
 
 	UFUNCTION(BlueprintCallable)
 	void CallOpenLevel(const FString& address);
