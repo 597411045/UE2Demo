@@ -4,6 +4,7 @@
 #include "CusSoCharacter.h"
 
 #include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 ACusSoCharacter::ACusSoCharacter()
@@ -18,6 +19,9 @@ ACusSoCharacter::ACusSoCharacter()
 	camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	camera->SetupAttachment(springArm, USpringArmComponent::SocketName);
 	camera->bUsePawnControlRotation = false;
+
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 void ACusSoCharacter::BeginPlay()

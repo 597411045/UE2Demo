@@ -16,7 +16,8 @@ void UCusSoUI::ShowAndFocus()
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();
 	if (pc)
 	{
-		FInputModeUIOnly mui;
+		//FInputModeUIOnly mui;
+		FInputModeGameAndUI mui;
 		mui.SetWidgetToFocus(TakeWidget());
 		mui.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
 		pc->SetInputMode(mui);
@@ -178,4 +179,9 @@ void UCusSoUI::OnClick_BT_DestroySession()
 	{
 		cusSo->DestroyGameSession();
 	}
+}
+
+void UCusSoUI::OnClick_BT_TravelToGameMap(const FString& address)
+{
+	cusSo->CallServetTravel(address, true);
 }

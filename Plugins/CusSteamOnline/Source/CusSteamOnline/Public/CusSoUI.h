@@ -57,6 +57,9 @@ private:
 	UPROPERTY(meta=(BindWidget))
 	class UButton* BT_DestroySession;
 
+	UPROPERTY(meta=(BindWidget))
+	class UButton* BT_TravelToGameMap;
+
 	UFUNCTION()
 	void OnClick_BT_CreateSession();
 	UFUNCTION()
@@ -67,6 +70,8 @@ private:
 	void OnClick_BT_JoinSession();
 	UFUNCTION()
 	void OnClick_BT_DestroySession();
+	UFUNCTION(BlueprintCallable)
+	void OnClick_BT_TravelToGameMap(const FString& address);
 
 	class UCusSoSubsystem* cusSo;
 };

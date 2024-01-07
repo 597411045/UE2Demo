@@ -6,6 +6,7 @@
 #include "OnlineSubsystem.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "OnlineSessionSettings.h"
+#include "GameFramework/GameModeBase.h"
 
 UCusSoSubsystem::UCusSoSubsystem()
 {
@@ -32,16 +33,18 @@ void UCusSoSubsystem::BeginPlay()
 		//                                  FString::Printf(
 		// 	                                 TEXT("Get A Session Interface %s"),
 		// 	                                 *ioSub->GetSubsystemName().ToString()));
-
 	}
 }
 
-
-void UCusSoSubsystem::OpenLobby(const FString& lobbyName = FString::Printf(TEXT("/Game/Work/Test/Lobby?listen")))
+///Game/Work/Test/Lobby?listen
+void UCusSoSubsystem::CallServetTravel(const FString& lobbyName = FString::Printf(TEXT("/Game/Work/Test/Lobby?listen")),
+                                       bool bSeam = false)
 {
 	UWorld* world = GetWorld();
 	if (world)
 	{
+		world->GetAuthGameMode()->bUseSeamlessTravel = bSeam;
+
 		world->ServerTravel(lobbyName);
 	}
 }
@@ -121,7 +124,7 @@ void UCusSoSubsystem::DoAfterCreateSession(FName name, bool flag)
 		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green,
 		                                 FString::Printf(TEXT("Create Session %s Success"), *name.ToString()));
 
-		OpenLobby();
+		CallServetTravel();
 	}
 	else
 	{

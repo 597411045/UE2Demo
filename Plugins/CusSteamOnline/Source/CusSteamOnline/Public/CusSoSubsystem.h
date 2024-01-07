@@ -49,7 +49,10 @@ public:
 	FCusSoAfterDestroySession DELE_CusSoAfterDestroySession;
 
 	UFUNCTION(BlueprintCallable)
-	void OpenLobby(const FString& lobbyName);
+	void CallServetTravel(const FString& lobbyName, bool bSeam);
+
+	UFUNCTION(BlueprintCallable)
+	void CallClientTravel(const FString& address);
 
 private:
 	//IOnlineSessionPtr
@@ -80,8 +83,6 @@ private:
 	UFUNCTION(BlueprintCallable)
 	void CallOpenLevel(const FString& address);
 
-	UFUNCTION(BlueprintCallable)
-	void CallClientTravel(const FString& address);
 
 	void DoAfterCreateSession(FName name, bool flag);
 
