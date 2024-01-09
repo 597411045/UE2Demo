@@ -4,8 +4,11 @@
 #include "CusSoCharacter.h"
 
 #include "Camera/CameraComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Net/UnrealNetwork.h"
+#include "Weapon.h"
 
 ACusSoCharacter::ACusSoCharacter()
 {
@@ -22,6 +25,9 @@ ACusSoCharacter::ACusSoCharacter()
 
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+
+	widgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
+	widgetComponent->SetupAttachment(RootComponent);
 }
 
 void ACusSoCharacter::BeginPlay()
@@ -62,6 +68,11 @@ void ACusSoCharacter::LookUp(float value)
 void ACusSoCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// if (OverlappingWeapon)
+	// {
+	// 	OverlappingWeapon->ShowWidget(true);
+	// }
 }
 
 void ACusSoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -73,4 +84,43 @@ void ACusSoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &ACusSoCharacter::Turn);
 	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &ACusSoCharacter::LookUp);
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ACharacter::Jump);
+}
+
+void ACusSoCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	//DOREPLIFETIME(ACusSoCharacter, OverlappingWeapon);
+	DOREPLIFETIME_CONDITION(ACusSoCharacter, OverlappingWeapon, COND_OwnerOnly);
+}
+
+void ACusSoCharacter::SetOverlappingWeapon(AWeapon* weapon)
+{
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowWidget(false);
+	}
+	OverlappingWeapon = weapon;
+	if (Controller && Controller->IsLocalController())
+	{
+		if (OverlappingWeapon)
+		{
+			OverlappingWeapon->ShowWidget(true);
+		}
+	}
+}
+
+void ACusSoCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
+{
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowWidget(true);
+	}
+	else
+	{
+		LastWeapon->ShowWidget(false);
+	}
+	// if (LastWeapon)
+	// {
+	// 	LastWeapon->ShowWidget(false);
+	// }
 }

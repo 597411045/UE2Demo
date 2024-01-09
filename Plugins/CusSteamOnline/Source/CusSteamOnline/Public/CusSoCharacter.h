@@ -26,10 +26,24 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void SetOverlappingWeapon(class AWeapon* weapon);
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	class USpringArmComponent* springArm;
 
 	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* camera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	class UWidgetComponent* widgetComponent;
+
+	//UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
+	class AWeapon* OverlappingWeapon;
+
+	UFUNCTION()
+	void OnRep_OverlappingWeapon(class AWeapon* LastWeapon);
 };
