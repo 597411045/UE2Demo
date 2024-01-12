@@ -6,6 +6,7 @@
 #include "CusSoCharacter.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -13,6 +14,7 @@ AWeapon::AWeapon()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 
 	skelMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkelMesh"));
@@ -52,6 +54,23 @@ void AWeapon::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AWeapon, state);
+}
+
+void AWeapon::OnRep_State()
+{
+	switch (state)
+	{
+	case EWeaponState::WS_Equpipped:
+		ShowWidget(false);
+		break;
+	default: ;
+	}
+}
+
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                               UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                               const FHitResult& SweepResult)
@@ -77,4 +96,16 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent,
 void AWeapon::ShowWidget(bool flag)
 {
 	widgetComponent->SetVisibility(flag);
+}
+
+void AWeapon::SetWeaponState(EWeaponState enums)
+{
+	state = enums;
+	switch (state)
+	{
+	case EWeaponState::WS_Equpipped:
+		ShowWidget(false);
+		sphereColl->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+	}
 }

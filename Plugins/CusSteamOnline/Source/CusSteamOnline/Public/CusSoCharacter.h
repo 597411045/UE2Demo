@@ -18,6 +18,7 @@ protected:
 	void MoveRight(float value);
 	void Turn(float value);
 	void LookUp(float value);
+	void EquipKey();
 
 public:
 	ACusSoCharacter();
@@ -30,6 +31,9 @@ public:
 
 	void SetOverlappingWeapon(class AWeapon* weapon);
 
+	virtual void PostInitializeComponents() override;
+
+	bool GetIsArmed();
 private:
 	UPROPERTY(VisibleAnywhere)
 	class USpringArmComponent* springArm;
@@ -46,4 +50,10 @@ private:
 
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(class AWeapon* LastWeapon);
+
+	UPROPERTY(VisibleAnywhere)
+	class UCusSoWeaponComponent* weaponComp;
+
+	UFUNCTION(Server,Reliable)
+	void CallServerEquipedAWeapon();
 };

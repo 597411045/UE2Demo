@@ -31,6 +31,7 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -39,8 +40,12 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class USphereComponent* sphereColl;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_State)
 	EWeaponState state;
+
+	UFUNCTION()
+	void OnRep_State();
+
 
 	UPROPERTY(VisibleAnywhere)
 	class UWidgetComponent* widgetComponent;
@@ -59,4 +64,5 @@ protected:
 
 public:
 	void ShowWidget(bool flag);
+	void SetWeaponState(EWeaponState enums);
 };

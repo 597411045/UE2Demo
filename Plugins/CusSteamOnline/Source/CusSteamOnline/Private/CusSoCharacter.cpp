@@ -3,6 +3,7 @@
 
 #include "CusSoCharacter.h"
 
+#include "CusSoWeaponComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -28,6 +29,9 @@ ACusSoCharacter::ACusSoCharacter()
 
 	widgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
 	widgetComponent->SetupAttachment(RootComponent);
+
+	weaponComp = CreateDefaultSubobject<UCusSoWeaponComponent>(TEXT("WeaponComponent"));
+	weaponComp->SetIsReplicated(true);
 }
 
 void ACusSoCharacter::BeginPlay()
@@ -65,6 +69,18 @@ void ACusSoCharacter::LookUp(float value)
 	AddControllerPitchInput(value);
 }
 
+void ACusSoCharacter::EquipKey()
+{
+	if (GetLocalRole() == ENetRole::ROLE_Authority)
+	{
+		weaponComp->EquipAWeapon(OverlappingWeapon);
+	}
+	else
+	{
+		CallServerEquipedAWeapon();
+	}
+}
+
 void ACusSoCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -73,6 +89,14 @@ void ACusSoCharacter::Tick(float DeltaTime)
 	// {
 	// 	OverlappingWeapon->ShowWidget(true);
 	// }
+	if (!weaponComp->equippedWeapon)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("%s no weapon"), *GetName()));
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, FString::Printf(TEXT("%s have weapon"), *GetName()));
+	}
 }
 
 void ACusSoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -84,6 +108,7 @@ void ACusSoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &ACusSoCharacter::Turn);
 	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &ACusSoCharacter::LookUp);
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction(TEXT("Equip"), IE_Pressed, this, &ACusSoCharacter::EquipKey);
 }
 
 void ACusSoCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -109,6 +134,24 @@ void ACusSoCharacter::SetOverlappingWeapon(AWeapon* weapon)
 	}
 }
 
+void ACusSoCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	weaponComp->equipper = this;
+}
+
+bool ACusSoCharacter::GetIsArmed()
+{
+	if (weaponComp->equippedWeapon)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 void ACusSoCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 {
 	if (OverlappingWeapon)
@@ -123,4 +166,9 @@ void ACusSoCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	// {
 	// 	LastWeapon->ShowWidget(false);
 	// }
+}
+
+void ACusSoCharacter::CallServerEquipedAWeapon_Implementation()
+{
+	weaponComp->EquipAWeapon(OverlappingWeapon);
 }
