@@ -32,6 +32,8 @@ ACusSoCharacter::ACusSoCharacter()
 
 	weaponComp = CreateDefaultSubobject<UCusSoWeaponComponent>(TEXT("WeaponComponent"));
 	weaponComp->SetIsReplicated(true);
+
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 }
 
 void ACusSoCharacter::BeginPlay()
@@ -81,6 +83,57 @@ void ACusSoCharacter::EquipKey()
 	}
 }
 
+void ACusSoCharacter::CrouchKey()
+{
+	if (GetIsArmed())
+	{
+		if (bIsCrouched)
+		{
+			UnCrouch();
+		}
+		else
+		{
+			Crouch();
+		}
+	}
+}
+
+void ACusSoCharacter::AimKeyPress()
+{
+	if (GetLocalRole() == ENetRole::ROLE_Authority)
+	{
+		weaponComp->bIsAiming = true;
+		bUseControllerRotationYaw = true;
+	}
+	else
+	{
+		CallServerBeAiming(true);
+		if (Controller && Controller->IsLocalController())
+		{
+			weaponComp->bIsAiming = true;
+			bUseControllerRotationYaw = true;
+		}
+	}
+}
+
+void ACusSoCharacter::AimKeyRelease()
+{
+	if (GetLocalRole() == ENetRole::ROLE_Authority)
+	{
+		weaponComp->bIsAiming = false;
+		bUseControllerRotationYaw = false;
+	}
+	else
+	{
+		CallServerBeAiming(false);
+		if (Controller && Controller->IsLocalController())
+		{
+			weaponComp->bIsAiming = false;
+			bUseControllerRotationYaw = false;
+		}
+	}
+}
+
 void ACusSoCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -89,14 +142,14 @@ void ACusSoCharacter::Tick(float DeltaTime)
 	// {
 	// 	OverlappingWeapon->ShowWidget(true);
 	// }
-	if (!weaponComp->equippedWeapon)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("%s no weapon"), *GetName()));
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, FString::Printf(TEXT("%s have weapon"), *GetName()));
-	}
+	// if (!weaponComp->equippedWeapon)
+	// {
+	// 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("%s no weapon"), *GetName()));
+	// }
+	// else
+	// {
+	// 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, FString::Printf(TEXT("%s have weapon"), *GetName()));
+	// }
 }
 
 void ACusSoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -109,6 +162,9 @@ void ACusSoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &ACusSoCharacter::LookUp);
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Equip"), IE_Pressed, this, &ACusSoCharacter::EquipKey);
+	PlayerInputComponent->BindAction(TEXT("Crouch"), IE_Pressed, this, &ACusSoCharacter::CrouchKey);
+	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Pressed, this, &ACusSoCharacter::AimKeyPress);
+	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Released, this, &ACusSoCharacter::AimKeyRelease);
 }
 
 void ACusSoCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -152,6 +208,11 @@ bool ACusSoCharacter::GetIsArmed()
 	}
 }
 
+bool ACusSoCharacter::GetIsAiming()
+{
+	return weaponComp->bIsAiming;
+}
+
 void ACusSoCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 {
 	if (OverlappingWeapon)
@@ -166,6 +227,12 @@ void ACusSoCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	// {
 	// 	LastWeapon->ShowWidget(false);
 	// }
+}
+
+void ACusSoCharacter::CallServerBeAiming_Implementation(bool flag)
+{
+	weaponComp->bIsAiming = flag;
+	bUseControllerRotationYaw = flag;
 }
 
 void ACusSoCharacter::CallServerEquipedAWeapon_Implementation()

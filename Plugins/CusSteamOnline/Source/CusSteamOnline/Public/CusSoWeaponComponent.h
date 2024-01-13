@@ -33,10 +33,9 @@ public:
 private:
 	UPROPERTY(Replicated)
 	class AWeapon* equippedWeapon;
-	class ACusSoCharacter* equipper;
-};
 
-inline void UCusSoWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-}
+	class ACusSoCharacter* equipper;
+
+	UPROPERTY(Replicated)
+	bool bIsAiming;
+};

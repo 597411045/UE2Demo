@@ -31,4 +31,6 @@ void UCusSoAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsInAir = cha->GetCharacterMovement()->IsFalling();
 	bIsAccelerating = cha->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0 ? true : false;
 	bIsArmed = cha->GetIsArmed();
+	bIsCrouched = cha->bIsCrouched;
+	bIsAmining = cha->GetIsAiming();
 }

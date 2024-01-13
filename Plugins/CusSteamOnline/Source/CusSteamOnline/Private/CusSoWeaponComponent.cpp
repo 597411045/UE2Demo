@@ -6,6 +6,7 @@
 #include "CusSoCharacter.h"
 #include "Weapon.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UCusSoWeaponComponent::UCusSoWeaponComponent()
@@ -48,4 +49,11 @@ void UCusSoWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+void UCusSoWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UCusSoWeaponComponent, equippedWeapon);
+	DOREPLIFETIME(UCusSoWeaponComponent, bIsAiming);
 }

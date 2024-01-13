@@ -19,6 +19,9 @@ protected:
 	void Turn(float value);
 	void LookUp(float value);
 	void EquipKey();
+	void CrouchKey();
+	void AimKeyPress();
+	void AimKeyRelease();
 
 public:
 	ACusSoCharacter();
@@ -34,6 +37,8 @@ public:
 	virtual void PostInitializeComponents() override;
 
 	bool GetIsArmed();
+	bool GetIsAiming();
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	class USpringArmComponent* springArm;
@@ -54,6 +59,9 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class UCusSoWeaponComponent* weaponComp;
 
-	UFUNCTION(Server,Reliable)
+	UFUNCTION(Server, Reliable)
 	void CallServerEquipedAWeapon();
+
+	UFUNCTION(Server, Reliable)
+	void CallServerBeAiming(bool flag);
 };
