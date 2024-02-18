@@ -11,12 +11,15 @@ namespace EOnJoinSessionCompleteResult
 	enum Type : int;
 }
 
+//一个内置参数类型的委托
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCusSoAfterCreateSession, bool, bFlag);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCusSoAfterStartSession, bool, bFlag);
 
+//有自定义类型的2个参数的委托
 DECLARE_MULTICAST_DELEGATE_TwoParams(FCusSoAfterFindSession, const TArray<FOnlineSessionSearchResult>& results,
                                      bool flag);
+
 DECLARE_MULTICAST_DELEGATE_OneParam(FCusSoAfterJoinSession, EOnJoinSessionCompleteResult::Type result);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCusSoAfterDestroySession, bool, bFlag);
@@ -42,6 +45,7 @@ public:
 
 	void BeginPlay();
 
+	//提供给UI使用的委托
 	FCusSoAfterCreateSession DELE_CusSoAfterCreateSession;
 	FCusSoAfterStartSession DELE_CusSoAfterStartSession;
 	FCusSoAfterFindSession DELE_CusSoAfterFindSession;
@@ -56,18 +60,25 @@ public:
 
 private:
 	//IOnlineSessionPtr
+
+	//网络会话
 	TSharedPtr<class IOnlineSession, ESPMode::ThreadSafe> ioSessionP;
+	//网络设置
 	TSharedPtr<class FOnlineSessionSettings> setting;
+	//网络搜索
 	TSharedPtr<class FOnlineSessionSearch> search;
 
+	//网络所谓结果
 	class FOnlineSessionSearchResult* ValidSession;
 
-	class FDelegateHandle CreateSessionHandle;
-	class FDelegateHandle StartSessionHandle;
-	class FDelegateHandle FindSessionHandle;
-	class FDelegateHandle JoinSessionHandle;
-	class FDelegateHandle DestroySessionHandle;
+	//注册给网络会话自动调用的委托，单一函数模式
+	//class FDelegateHandle CreateSessionHandle;
+	//class FDelegateHandle StartSessionHandle;
+	//class FDelegateHandle FindSessionHandle;
+	//class FDelegateHandle JoinSessionHandle;
+	//class FDelegateHandle DestroySessionHandle;
 
+	//委托，默认模式
 	//FOnCreateSessionComplete
 	//TDelegate<void(FName, bool)> afterCreateSession;
 	//FOnStartSessionCompleteDelegate
@@ -79,11 +90,9 @@ private:
 	//FOnDestroySessionCompleteDelegate
 	//TDelegate<void(FName, bool)> afterDestroySession;
 
-
 	UFUNCTION(BlueprintCallable)
 	void CallOpenLevel(const FString& address);
-
-
+	
 	void DoAfterCreateSession(FName name, bool flag);
 
 	void DoAfterStartSession(FName name, bool flag);

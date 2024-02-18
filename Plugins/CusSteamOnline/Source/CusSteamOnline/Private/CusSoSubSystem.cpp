@@ -15,8 +15,7 @@ UCusSoSubsystem::UCusSoSubsystem()
 
 void UCusSoSubsystem::BeginPlay()
 {
-	// ...
-	//
+	// 委托，默认模式
 	// afterCreateSession = TDelegate<void(FName, bool)>::CreateUObject(this, &UCusSoSubsystem::DoAfterCreateSession);
 	// afterStartSession = TDelegate<void(FName, bool)>::CreateUObject(this, &UCusSoSubsystem::DoAfterStartSession);
 	// afterFindSession = TDelegate<void(bool)>::CreateUObject(this, &UCusSoSubsystem::DoAfterFindSession);
@@ -24,9 +23,12 @@ void UCusSoSubsystem::BeginPlay()
 	// 	this, &UCusSoSubsystem::DoAfterJoinSession);
 	// afterDestroySession = TDelegate<void(FName, bool)>::CreateUObject(this, &UCusSoSubsystem::DoAfterDestroySession);
 	//
+
+	//初始化网络系统
 	IOnlineSubsystem* ioSub = IOnlineSubsystem::Get();
 	if (ioSub)
 	{
+		//获取网络会话
 		ioSessionP = ioSub->GetSessionInterface();
 		///
 		// GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green,
@@ -43,7 +45,8 @@ void UCusSoSubsystem::CallServetTravel(const FString& lobbyName = FString::Print
 	UWorld* world = GetWorld();
 	if (world)
 	{
-		world->GetAuthGameMode()->bUseSeamlessTravel = bSeam;
+		//使用无缝地图？？
+		//world->GetAuthGameMode()->bUseSeamlessTravel = bSeam;
 
 		world->ServerTravel(lobbyName);
 	}
@@ -56,6 +59,7 @@ void UCusSoSubsystem::CallOpenLevel(const FString& address)
 
 void UCusSoSubsystem::CallClientTravel(const FString& address)
 {
+	//获取本地玩家PC
 	APlayerController* PC = UGameplayStatics::GetGameInstance(GetWorld())->GetFirstLocalPlayerController();
 	if (PC)
 	{
@@ -65,6 +69,7 @@ void UCusSoSubsystem::CallClientTravel(const FString& address)
 
 void UCusSoSubsystem::CreateGameSession()
 {
+	//确认网络会话不为空
 	if (ioSessionP.IsValid() == false)
 	{
 		///
@@ -72,6 +77,8 @@ void UCusSoSubsystem::CreateGameSession()
 		                                 FString::Printf(TEXT("Session Interface Is Nulllptr")));
 		return;
 	}
+
+	//确认网络会话Session为空
 	FNamedOnlineSession* sessionName = ioSessionP->GetNamedSession(NAME_GameSession);
 	if (sessionName != nullptr)
 	{
@@ -80,8 +87,9 @@ void UCusSoSubsystem::CreateGameSession()
 		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Yellow,
 		                                 FString::Printf(TEXT("Destroyed Old Session %d"), NAME_GameSession));
 	}
-	//
+	//初始化设置
 	setting = MakeShareable(new FOnlineSessionSettings());
+	//如果没有连接steam，就适用局域网
 	setting->bIsLANMatch = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL" ? true : false;
 	setting->NumPublicConnections = 4;
 	setting->bAllowJoinInProgress = true;
@@ -89,16 +97,21 @@ void UCusSoSubsystem::CreateGameSession()
 	setting->bShouldAdvertise = true;
 	setting->bUsesPresence = true;
 	setting->bUseLobbiesIfAvailable = true;
+	//设置传输的值
 	setting->Set(FName("TestKey"), FString("TestValue"), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	setting->BuildUniqueId = 1;
 
-	//
+	//获取本地玩家PC
 	const ULocalPlayer* player = GetWorld()->GetFirstLocalPlayerFromController();
+
 	//
 	// CreateSessionHandle = ioSessionP->AddOnCreateSessionCompleteDelegate_Handle(
 	// 	FOnCreateSessionCompleteDelegate::CreateUObject(this, &UCusSoSubsystem::DoAfterCreateSession));
 
+	//绑定委托
 	ioSessionP->OnCreateSessionCompleteDelegates.AddUObject(this, &UCusSoSubsystem::DoAfterCreateSession);
+
+	//执行创建Session
 	if (ioSessionP->CreateSession(*player->GetPreferredUniqueNetId(), NAME_GameSession, *setting) == true)
 	{
 		///
@@ -112,7 +125,9 @@ void UCusSoSubsystem::CreateGameSession()
 		                                 FString::Printf(TEXT("Try Create Session %d Failed"), NAME_GameSession));
 		//ioSessionP->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionHandle);
 		DELE_CusSoAfterCreateSession.Broadcast(false);
-		ioSessionP->OnCreateSessionCompleteDelegates.Remove(CreateSessionHandle);
+
+		//ioSessionP->OnCreateSessionCompleteDelegates.Remove(CreateSessionHandle);
+		ioSessionP->OnCreateSessionCompleteDelegates.RemoveAll(this);
 	}
 }
 

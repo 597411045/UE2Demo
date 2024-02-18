@@ -18,21 +18,28 @@ ACusSoCharacter::ACusSoCharacter()
 	springArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	springArm->SetupAttachment(GetMesh());
 	springArm->TargetArmLength = 600;
+	//摇臂跟随角色旋转
 	springArm->bUsePawnControlRotation = true;
 
 	camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	camera->SetupAttachment(springArm, USpringArmComponent::SocketName);
+	//摄像机不跟随角色旋转
 	camera->bUsePawnControlRotation = false;
 
+	//角色不跟随控制器上下旋转
 	bUseControllerRotationYaw = false;
+
+	//角色自动转向前行的方向
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	widgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
 	widgetComponent->SetupAttachment(RootComponent);
 
 	weaponComp = CreateDefaultSubobject<UCusSoWeaponComponent>(TEXT("WeaponComponent"));
+	//武器组件需要同步
 	weaponComp->SetIsReplicated(true);
 
+	//设置角色可以蹲下
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 }
 
@@ -45,7 +52,9 @@ void ACusSoCharacter::MoveForward(float value)
 {
 	if (Controller != nullptr && value != 0)
 	{
+		//获取左右旋转值
 		const FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
+		//获取前方单位向量
 		const FVector Direction(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X));
 		AddMovementInput(Direction, value);
 	}
@@ -55,7 +64,9 @@ void ACusSoCharacter::MoveRight(float value)
 {
 	if (Controller != nullptr && value != 0)
 	{
+		//获取左右旋转值
 		const FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
+		//获取右方单位向量
 		const FVector Direction(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y));
 		AddMovementInput(Direction, value);
 	}
@@ -73,18 +84,21 @@ void ACusSoCharacter::LookUp(float value)
 
 void ACusSoCharacter::EquipKey()
 {
+	//如果是服务器方
 	if (GetLocalRole() == ENetRole::ROLE_Authority)
 	{
 		weaponComp->EquipAWeapon(OverlappingWeapon);
 	}
 	else
 	{
+		//否则需要调用服务器方装备武器
 		CallServerEquipedAWeapon();
 	}
 }
 
 void ACusSoCharacter::CrouchKey()
 {
+	//装备武器后才可以蹲下
 	if (GetIsArmed())
 	{
 		if (bIsCrouched)
@@ -100,16 +114,22 @@ void ACusSoCharacter::CrouchKey()
 
 void ACusSoCharacter::AimKeyPress()
 {
+	//如果是服务器方
 	if (GetLocalRole() == ENetRole::ROLE_Authority)
 	{
+		//直接执行
 		weaponComp->bIsAiming = true;
 		bUseControllerRotationYaw = true;
 	}
+	//如果是客户端方
 	else
 	{
+		//调用服务器方要做的事情
 		CallServerBeAiming(true);
+		//如果是本地
 		if (Controller && Controller->IsLocalController())
 		{
+			//自己也要做一次
 			weaponComp->bIsAiming = true;
 			bUseControllerRotationYaw = true;
 		}
@@ -170,21 +190,28 @@ void ACusSoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 void ACusSoCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//设置武器指针需要同步，仅需同步拥有者
 	//DOREPLIFETIME(ACusSoCharacter, OverlappingWeapon);
 	DOREPLIFETIME_CONDITION(ACusSoCharacter, OverlappingWeapon, COND_OwnerOnly);
 }
 
 void ACusSoCharacter::SetOverlappingWeapon(AWeapon* weapon)
 {
+	//如果之前有武器，默认直接关闭拾取提示
 	if (OverlappingWeapon)
 	{
 		OverlappingWeapon->ShowWidget(false);
 	}
+	//赋值新武器
 	OverlappingWeapon = weapon;
+	//如果是本地
 	if (Controller && Controller->IsLocalController())
 	{
+		//且有武器
 		if (OverlappingWeapon)
 		{
+			//显示拾取提示
 			OverlappingWeapon->ShowWidget(true);
 		}
 	}
@@ -198,6 +225,7 @@ void ACusSoCharacter::PostInitializeComponents()
 
 bool ACusSoCharacter::GetIsArmed()
 {
+	//是否装备武器，要从武器组件获取
 	if (weaponComp->equippedWeapon)
 	{
 		return true;
@@ -210,17 +238,23 @@ bool ACusSoCharacter::GetIsArmed()
 
 bool ACusSoCharacter::GetIsAiming()
 {
+	//是否瞄准，要从武器组件获取
 	return weaponComp->bIsAiming;
 }
 
+//同步武器时调用的函数
 void ACusSoCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 {
+	//同步成功，并且有触碰武器
 	if (OverlappingWeapon)
 	{
+		//显示触碰武器的拾取提示
 		OverlappingWeapon->ShowWidget(true);
 	}
+	//同步成功，可能因为离开而没有触碰的武器
 	else
 	{
+		//之前的武器关闭提示
 		LastWeapon->ShowWidget(false);
 	}
 	// if (LastWeapon)

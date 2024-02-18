@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "CusSoHeadWidget.generated.h"
 
+//用于显示玩家角色信息
 
 UCLASS()
 class CUSSTEAMONLINE_API UCusSoHeadWidget : public UUserWidget

@@ -6,6 +6,7 @@
 #include "CusSoCharacter.h"
 #include "Weapon.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -31,6 +32,8 @@ void UCusSoWeaponComponent::EquipAWeapon(AWeapon* weapon)
 	}
 	equippedWeapon->SetOwner(equipper);
 	//equippedWeapon->ShowWidget(false);
+
+	equipper->GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 // Called when the game starts
