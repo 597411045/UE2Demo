@@ -24,12 +24,16 @@ void UCusSoWeaponComponent::EquipAWeapon(AWeapon* weapon)
 	if (equipper == nullptr || weapon == nullptr) return;
 
 	equippedWeapon = weapon;
+	//设置武器状态
 	equippedWeapon->SetWeaponState(EWeaponState::WS_Equpipped);
+	//获取装备者武器Socket
 	const USkeletalMeshSocket* meshSocket = equipper->GetMesh()->GetSocketByName(FName("RightHandSockets"));
 	if (meshSocket)
 	{
+		//将装备附加到Socket
 		meshSocket->AttachActor(equippedWeapon, equipper->GetMesh());
 	}
+	//记录Owner
 	equippedWeapon->SetOwner(equipper);
 	//equippedWeapon->ShowWidget(false);
 
@@ -57,6 +61,7 @@ void UCusSoWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 void UCusSoWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	//实时同步2个变量
 	DOREPLIFETIME(UCusSoWeaponComponent, equippedWeapon);
 	DOREPLIFETIME(UCusSoWeaponComponent, bIsAiming);
 }

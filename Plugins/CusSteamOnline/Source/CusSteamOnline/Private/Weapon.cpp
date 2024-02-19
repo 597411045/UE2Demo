@@ -17,19 +17,22 @@ AWeapon::AWeapon()
 	bReplicates = true;
 
 
+	//设置Mesh
 	skelMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkelMesh"));
 	SetRootComponent(skelMesh);
 
-
+	//设置Mesh碰撞
 	skelMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	skelMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Ignore);
 	skelMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	//设置范围碰撞
 	sphereColl = CreateDefaultSubobject<USphereComponent>(TEXT("SphereColl"));
 	sphereColl->SetupAttachment(RootComponent);
 	sphereColl->SetCollisionResponseToAllChannels(ECR_Ignore);
 	sphereColl->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	//设置UI
 	widgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WSidgetComponent"));
 	widgetComponent->SetupAttachment(RootComponent);
 }
@@ -41,6 +44,7 @@ void AWeapon::BeginPlay()
 	widgetComponent->SetVisibility(false);
 	if (GetLocalRole() == ENetRole::ROLE_Authority)
 	{
+		//服务器端允许碰撞
 		sphereColl->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		sphereColl->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Overlap);
 		sphereColl->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereOverlap);
@@ -57,6 +61,7 @@ void AWeapon::Tick(float DeltaTime)
 void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	//实时同步的变量
 	DOREPLIFETIME(AWeapon, state);
 }
 
@@ -64,6 +69,7 @@ void AWeapon::OnRep_State()
 {
 	switch (state)
 	{
+	//同步为已装备的时候，关闭提示
 	case EWeaponState::WS_Equpipped:
 		ShowWidget(false);
 		break;
@@ -75,6 +81,7 @@ void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
                               UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                               const FHitResult& SweepResult)
 {
+	//触碰到时，设置触碰者触碰到的武器
 	ACusSoCharacter* cha = Cast<ACusSoCharacter>(OtherActor);
 	if (cha)
 	{
@@ -86,6 +93,7 @@ void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent,
                                  AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	//离开触碰到时，移除触碰者触碰到的武器
 	ACusSoCharacter* cha = Cast<ACusSoCharacter>(OtherActor);
 	if (cha)
 	{
@@ -103,6 +111,7 @@ void AWeapon::SetWeaponState(EWeaponState enums)
 	state = enums;
 	switch (state)
 	{
+	//设置武器状态为装备的时候，关闭提示，取消碰撞
 	case EWeaponState::WS_Equpipped:
 		ShowWidget(false);
 		sphereColl->SetCollisionEnabled(ECollisionEnabled::NoCollision);

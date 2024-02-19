@@ -13,7 +13,7 @@ public class UE2Demo : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"Core", "CoreUObject", "Engine", "InputCore", "Networking", "Sockets", "UMG", "OnlineSubsystemSteam",
-			"OnlineSubsystem","Slate"
+			"OnlineSubsystem","Slate","CusSteamOnline"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });

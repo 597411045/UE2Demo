@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "CusSoUI.generated.h"
+#include "CusSoUI2D.generated.h"
 
 /**
  * 
@@ -15,7 +15,7 @@ namespace EOnJoinSessionCompleteResult
 }
 
 UCLASS()
-class CUSSTEAMONLINE_API UCusSoUI : public UUserWidget
+class UE2DEMO_API UCusSoUI2D : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -23,6 +23,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ShowAndFocus();
 	void HideAndRemove();
+
+	//Subsys指针
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	class UCusSoSubsystem* cusSo;
 
 protected:
 	virtual bool Initialize() override;
@@ -75,7 +79,4 @@ private:
 	void OnClick_BT_DestroySession();
 	UFUNCTION(BlueprintCallable)
 	void OnClick_BT_TravelToGameMap(const FString& address);
-
-	//Subsys指针
-	class UCusSoSubsystem* cusSo;
 };

@@ -1,16 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CusSoUI.h"
+#include "CusSoUI2D.h"
 #include "CusSoSubsystem.h"
 #include "OnlineSessionSettings.h"
 #include "Components/Button.h"
 
 
-void UCusSoUI::ShowAndFocus()
+void UCusSoUI2D::ShowAndFocus()
 {
 	//显示UI
-	AddToViewport();
+	//AddToViewport();
 	SetVisibility(ESlateVisibility::Visible);
 	bIsFocusable = true;
 
@@ -32,15 +32,16 @@ void UCusSoUI::ShowAndFocus()
 		//获取Subsys
 		cusSo = gi->GetSubsystem<UCusSoSubsystem>();
 		//注册委托
-		cusSo->DELE_CusSoAfterCreateSession.AddDynamic(this, &UCusSoUI::DFUNC_CusSoAfterCreateSession);
-		cusSo->DELE_CusSoAfterStartSession.AddDynamic(this, &UCusSoUI::DFUNC_CusSoAfterCreateSession);
-		cusSo->DELE_CusSoAfterFindSession.AddUObject(this, &UCusSoUI::DFUNC_CusSoAfterFindSession);
-		cusSo->DELE_CusSoAfterJoinSession.AddUObject(this, &UCusSoUI::DFUNC_CusSoAfterJoinSession);
-		cusSo->DELE_CusSoAfterDestroySession.AddDynamic(this, &UCusSoUI::DFUNC_CusSoAfterCreateSession);
+		cusSo->DELE_CusSoAfterCreateSession.AddDynamic(this, &UCusSoUI2D::DFUNC_CusSoAfterCreateSession);
+		cusSo->DELE_CusSoAfterStartSession.AddDynamic(this, &UCusSoUI2D::DFUNC_CusSoAfterCreateSession);
+		cusSo->DELE_CusSoAfterFindSession.AddUObject(this, &UCusSoUI2D::DFUNC_CusSoAfterFindSession);
+		cusSo->DELE_CusSoAfterJoinSession.AddUObject(this, &UCusSoUI2D::DFUNC_CusSoAfterJoinSession);
+		cusSo->DELE_CusSoAfterDestroySession.AddDynamic(this, &UCusSoUI2D::DFUNC_CusSoAfterCreateSession);
+		//->lobbyName = FString::Printf(TEXT("/Game/Work/Demo2/Demo2_1?listen"));
 	}
 }
 
-void UCusSoUI::HideAndRemove()
+void UCusSoUI2D::HideAndRemove()
 {
 	//隐藏UI
 	RemoveFromParent();
@@ -53,7 +54,7 @@ void UCusSoUI::HideAndRemove()
 	}
 }
 
-bool UCusSoUI::Initialize()
+bool UCusSoUI2D::Initialize()
 {
 	if (Super::Initialize() == false)
 	{
@@ -62,27 +63,27 @@ bool UCusSoUI::Initialize()
 
 
 	//注册点击事件
-	BT_CreateSession->OnClicked.AddDynamic(this, &UCusSoUI::OnClick_BT_CreateSession);
+	BT_CreateSession->OnClicked.AddDynamic(this, &UCusSoUI2D::OnClick_BT_CreateSession);
 
-	BT_StartSession->OnClicked.AddDynamic(this, &UCusSoUI::OnClick_BT_StartSession);
+	BT_StartSession->OnClicked.AddDynamic(this, &UCusSoUI2D::OnClick_BT_StartSession);
 
-	BT_FindSession->OnClicked.AddDynamic(this, &UCusSoUI::OnClick_BT_FindSession);
+	BT_FindSession->OnClicked.AddDynamic(this, &UCusSoUI2D::OnClick_BT_FindSession);
 
-	BT_JoinSession->OnClicked.AddDynamic(this, &UCusSoUI::OnClick_BT_JoinSession);
+	BT_JoinSession->OnClicked.AddDynamic(this, &UCusSoUI2D::OnClick_BT_JoinSession);
 
-	BT_DestroySession->OnClicked.AddDynamic(this, &UCusSoUI::OnClick_BT_DestroySession);
+	BT_DestroySession->OnClicked.AddDynamic(this, &UCusSoUI2D::OnClick_BT_DestroySession);
 
 	return true;
 }
 
-void UCusSoUI::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
+void UCusSoUI2D::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
 {
 	//切换到新世界时，自动隐藏
 	HideAndRemove();
 	Super::OnLevelRemovedFromWorld(InLevel, InWorld);
 }
 
-void UCusSoUI::DFUNC_CusSoAfterCreateSession(bool flag)
+void UCusSoUI2D::DFUNC_CusSoAfterCreateSession(bool flag)
 {
 	//仅作提示
 	if (flag)
@@ -97,7 +98,7 @@ void UCusSoUI::DFUNC_CusSoAfterCreateSession(bool flag)
 	}
 }
 
-void UCusSoUI::DFUNC_CusSoAfterStartSession(bool flag)
+void UCusSoUI2D::DFUNC_CusSoAfterStartSession(bool flag)
 {
 	//仅作提示
 	if (flag)
@@ -112,7 +113,7 @@ void UCusSoUI::DFUNC_CusSoAfterStartSession(bool flag)
 	}
 }
 
-void UCusSoUI::DFUNC_CusSoAfterFindSession(const TArray<FOnlineSessionSearchResult>& results, bool flag)
+void UCusSoUI2D::DFUNC_CusSoAfterFindSession(const TArray<FOnlineSessionSearchResult>& results, bool flag)
 {
 	//仅作提示
 	if (flag)
@@ -127,13 +128,13 @@ void UCusSoUI::DFUNC_CusSoAfterFindSession(const TArray<FOnlineSessionSearchResu
 	}
 }
 
-void UCusSoUI::DFUNC_CusSoAfterJoinSession(EOnJoinSessionCompleteResult::Type result)
+void UCusSoUI2D::DFUNC_CusSoAfterJoinSession(EOnJoinSessionCompleteResult::Type result)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green,
 	                                 FString::Printf(TEXT("EOnJoinSessionCompleteResult")));
 }
 
-void UCusSoUI::DFUNC_CusSoAfterDestroySession(bool flag)
+void UCusSoUI2D::DFUNC_CusSoAfterDestroySession(bool flag)
 {
 	//仅作提示
 	if (flag)
@@ -148,7 +149,7 @@ void UCusSoUI::DFUNC_CusSoAfterDestroySession(bool flag)
 	}
 }
 
-void UCusSoUI::OnClick_BT_CreateSession()
+void UCusSoUI2D::OnClick_BT_CreateSession()
 {
 	//点击后，创建Session
 	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Yellow, FString::Printf(TEXT("OnClick_BT_CreateSession")));
@@ -158,7 +159,7 @@ void UCusSoUI::OnClick_BT_CreateSession()
 	}
 }
 
-void UCusSoUI::OnClick_BT_StartSession()
+void UCusSoUI2D::OnClick_BT_StartSession()
 {
 	//暂未使用
 	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Yellow, FString::Printf(TEXT("OnClick_BT_StartSession")));
@@ -168,7 +169,7 @@ void UCusSoUI::OnClick_BT_StartSession()
 	}
 }
 
-void UCusSoUI::OnClick_BT_FindSession()
+void UCusSoUI2D::OnClick_BT_FindSession()
 {
 	//点击后，寻找Session
 	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Yellow, FString::Printf(TEXT("OnClick_BT_FindSession")));
@@ -178,7 +179,7 @@ void UCusSoUI::OnClick_BT_FindSession()
 	}
 }
 
-void UCusSoUI::OnClick_BT_JoinSession()
+void UCusSoUI2D::OnClick_BT_JoinSession()
 {
 	//点击后，加入Session
 	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Yellow, FString::Printf(TEXT("OnClick_BT_JoinSession")));
@@ -188,7 +189,7 @@ void UCusSoUI::OnClick_BT_JoinSession()
 	}
 }
 
-void UCusSoUI::OnClick_BT_DestroySession()
+void UCusSoUI2D::OnClick_BT_DestroySession()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Yellow, FString::Printf(TEXT("OnClick_BT_DestroySession")));
 	if (cusSo)
@@ -197,7 +198,7 @@ void UCusSoUI::OnClick_BT_DestroySession()
 	}
 }
 
-void UCusSoUI::OnClick_BT_TravelToGameMap(const FString& address)
+void UCusSoUI2D::OnClick_BT_TravelToGameMap(const FString& address)
 {
 	//点击后，服务端切换到指定世界
 	cusSo->CallServetTravel(false);

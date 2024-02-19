@@ -17,6 +17,7 @@ public:
 	UCusSoWeaponComponent();
 	friend class ACusSoCharacter;
 
+	//提供外部调用，装备武器
 	void EquipAWeapon(class AWeapon* weapon);
 
 protected:
@@ -31,11 +32,14 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
+	//已装备的武器
 	UPROPERTY(Replicated)
 	class AWeapon* equippedWeapon;
 
+	//装备者
 	class ACusSoCharacter* equipper;
 
+	//是否在瞄准
 	UPROPERTY(Replicated)
 	bool bIsAiming;
 };
