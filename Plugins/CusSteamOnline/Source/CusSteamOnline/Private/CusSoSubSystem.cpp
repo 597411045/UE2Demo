@@ -39,7 +39,7 @@ void UCusSoSubsystem::BeginPlay()
 }
 
 ///Game/Work/Test/Lobby?listen
-void UCusSoSubsystem::CallServetTravel(bool bSeam = false)
+void UCusSoSubsystem::CallServetTravel(const FString& lobbyName, bool bSeam = false)
 {
 	UWorld* world = GetWorld();
 	if (world)
@@ -138,7 +138,7 @@ void UCusSoSubsystem::DoAfterCreateSession(FName name, bool flag)
 		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green,
 		                                 FString::Printf(TEXT("Create Session %s Success"), *name.ToString()));
 
-		CallServetTravel();
+		CallServetTravel(FString::Printf(TEXT("/Game/Work/Test/Lobby?listen")), false);
 	}
 	else
 	{
@@ -185,6 +185,8 @@ void UCusSoSubsystem::FindGameSession()
 	//
 	/*FindSessionHandle = ioSessionP->OnFindSessionsCompleteDelegates.AddUObject(
 		this, &UCusSoSubsystem::DoAfterFindSession);*/
+	ioSessionP->OnFindSessionsCompleteDelegates.AddUObject(this, &UCusSoSubsystem::DoAfterFindSession);
+
 	if (ioSessionP->FindSessions(*player->GetPreferredUniqueNetId(), search.ToSharedRef()) == true)
 	{
 		//找到了Session的提示
@@ -259,6 +261,8 @@ void UCusSoSubsystem::JoinGameSession()
 	//
 	/*JoinSessionHandle = ioSessionP->OnJoinSessionCompleteDelegates.AddUObject(
 		this, &UCusSoSubsystem::DoAfterJoinSession);*/
+	ioSessionP->OnJoinSessionCompleteDelegates.AddUObject(
+		this, &UCusSoSubsystem::DoAfterJoinSession);
 	if (ioSessionP->JoinSession(*player->GetPreferredUniqueNetId(), NAME_GameSession, *ValidSession) == true)
 	{
 		//加入Session成功的提示
@@ -271,9 +275,9 @@ void UCusSoSubsystem::JoinGameSession()
 		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green,
 		                                 FString::Printf(TEXT("Try Join Session %d Failed"), NAME_GameSession));
 		DELE_CusSoAfterJoinSession.Broadcast(EOnJoinSessionCompleteResult::UnknownError);
-		
+
 		//ioSessionP->OnJoinSessionCompleteDelegates.Remove(JoinSessionHandle);
-		
+
 		ioSessionP->OnJoinSessionCompleteDelegates.RemoveAll(this);
 	}
 }

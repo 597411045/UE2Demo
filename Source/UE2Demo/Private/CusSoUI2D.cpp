@@ -201,5 +201,5 @@ void UCusSoUI2D::OnClick_BT_DestroySession()
 void UCusSoUI2D::OnClick_BT_TravelToGameMap(const FString& address)
 {
 	//点击后，服务端切换到指定世界
-	cusSo->CallServetTravel(false);
+	cusSo->CallServetTravel(address,false);
 }

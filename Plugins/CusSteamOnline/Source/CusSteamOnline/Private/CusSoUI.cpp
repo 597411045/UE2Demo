@@ -78,7 +78,7 @@ bool UCusSoUI::Initialize()
 void UCusSoUI::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
 {
 	//切换到新世界时，自动隐藏
-	HideAndRemove();
+	//HideAndRemove();
 	Super::OnLevelRemovedFromWorld(InLevel, InWorld);
 }
 
@@ -200,5 +200,5 @@ void UCusSoUI::OnClick_BT_DestroySession()
 void UCusSoUI::OnClick_BT_TravelToGameMap(const FString& address)
 {
 	//点击后，服务端切换到指定世界
-	cusSo->CallServetTravel(false);
+	cusSo->CallServetTravel(address,false);
 }

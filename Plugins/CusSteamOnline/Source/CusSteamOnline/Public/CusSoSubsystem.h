@@ -53,10 +53,10 @@ public:
 	FCusSoAfterDestroySession DELE_CusSoAfterDestroySession;
 
 	UFUNCTION(BlueprintCallable)
-	void CallServetTravel(bool bSeam);
+	void CallServetTravel(const FString& lobbyName,bool bSeam);
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	FString lobbyName = FString::Printf(TEXT("/Game/Work/Test/Lobby?listen"));
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	//FString lobbyName = FString::Printf(TEXT("/Game/Work/Test/Lobby?listen"));
 
 	UFUNCTION(BlueprintCallable)
 	void CallClientTravel(const FString& address);
