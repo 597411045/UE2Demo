@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+
 #include "MyGameInstance.generated.h"
 
 /**
@@ -16,5 +17,7 @@ class UE2DEMO_API UMyGameInstance : public UGameInstance
 
 public:
 
-	
+	UFUNCTION(BlueprintCallable)
+	UObject* MountPaks(const FString& path);
+
 };
